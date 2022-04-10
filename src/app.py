@@ -127,5 +127,7 @@ def create_patient():
     else:
         return not_found()
 
+
+# Se agrega un nuevo commit de prueba 10-04-2022  18:00
 if __name__ == "__main__":
     app.run(debug=True)
