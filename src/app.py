@@ -58,6 +58,7 @@ def delete_user(id):
     response = jsonify({'message': 'El usuario ' + id + ' fue eliminado correctamente!'})
     return response
 
+#Actualizamos un usuario por ID
 @app.route ('/Usuarios/<id>', methods=['PUT'])
 def update_user(id):
     username = request.json['username']
@@ -66,7 +67,7 @@ def update_user(id):
 
     if username and email and password:
         hashed_password = generate_password_hash(password)
-        mongo.db.Uusarios.update_one({'_id': ObjectId(id)}, {'$set': {
+        mongo.db.Usuarios.update_one({'_id': ObjectId(id)}, {'$set': {
             'username': username,
             'password': hashed_password,
             'email': email
@@ -127,6 +128,43 @@ def create_patient():
     else:
         return not_found()
 
+#Se trae una lista de los pacientes de la BD
+@app.route('/Pacientes', methods=['GET'])
+def  get_patients():
+    users =  mongo.db.Pacientes.find()
+    response = json_util.dumps(users)
+    return Response(response, mimetype='application/json')
+
+#Traemos un paciente por ID
+@app.route('/Pacientes/<id>', methods=['GET'])
+def get_onepatient(id):
+    user = mongo.db.Pacientes.find_one({'_id': ObjectId(id)})
+    response = json_util.dumps(user)
+    return Response (response, mimetype='application/json') 
+
+#Eliminamos un paciente por ID
+@app.route('/Pacientes/<id>', methods=['DELETE'])
+def delete_patient(id):
+    mongo.db.Pacientes.delete_one({'_id': ObjectId(id)})
+    response = jsonify({'message': 'El usuario ' + id + ' fue eliminado correctamente!'})
+    return response
+
+#Actualizamos un paciente por ID
+@app.route ('/Usuarios/<id>', methods=['PUT'])
+def update_patient(id):
+    username = request.json['username']
+    password = request.json['password']
+    email = request.json['email']
+
+    if username and email and password:
+        hashed_password = generate_password_hash(password)
+        mongo.db.Pacientes.update_one({'_id': ObjectId(id)}, {'$set': {
+            'username': username,
+            'password': hashed_password,
+            'email': email
+        }})
+        response = jsonify({'message': 'El Usuario ' + id + ' fue actualizado correctamente!'})
+        return response
 
 # Se agrega un nuevo commit de prueba 10-04-2022  18:00
 if __name__ == "__main__":
