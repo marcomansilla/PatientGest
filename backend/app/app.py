@@ -1,23 +1,24 @@
-from flask import Flask, request, jsonify, Response 
+from flask import Flask, request, jsonify, Response
 from flask_pymongo import PyMongo
-from werkzeug.security import generate_password_hash, check_password_hash  
+from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo import MongoClient
 from bson import json_util
 from bson.objectid import ObjectId
+from .database import db
 
-app = Flask (__name__)
-app.config['MONGO_URI']='mongodb://localhost/Consume_Api'
-mongo = PyMongo(app)
+app = Flask(__name__)
+mongo = db
 
-#Se crean nuevos usuarios en la BD (Collección Usuarios)
+# Se crean nuevos usuarios en la BD (Collección Usuarios)
+
+
 @app.route('/Usuarios', methods=['POST'])
 def create_user():
-    #Recibo datos
+    # Recibo datos
     print(request.json)
     username = request.json['username']
     password = request.json['password']
     email = request.json['email']
-    
 
     if username and email and password:
         hashed_password = generate_password_hash(password)
@@ -25,19 +26,21 @@ def create_user():
             {'username': username, 'email': email, 'password': hashed_password}
         )
         response = {
-            'id':str(id),
+            'id': str(id),
             'username': username,
             'password': hashed_password,
             'email': email
-                  
+
         }
-        return response 
+        return response
     else:
         return not_found()
 
-    return {'message':'received'}
+    return {'message': 'received'}
 
-#Se trae una lista de los usuarios de la BD
+# Se trae una lista de los usuarios de la BD
+
+
 @app.route('/Usuarios', methods=['GET'])
 def  get_users():
     users =  mongo.db.Usuarios.find()
@@ -49,7 +52,7 @@ def  get_users():
 def get_oneuser(id):
     user = mongo.db.Usuarios.find_one({'_id': ObjectId(id)})
     response = json_util.dumps(user)
-    return Response (response, mimetype='application/json') 
+    return Response (response, mimetype='application/json')
 
 #Eliminamos un usuario por ID
 @app.route('/Usuarios/<id>', methods=['DELETE'])
@@ -78,7 +81,7 @@ def update_user(id):
 #Control de errores
 @app.errorhandler(404)
 def not_found(error=None):
-    
+
     response = jsonify({
         'message' : 'No encontramos el recurso: ' + request.url,
         'status': 404
@@ -106,7 +109,7 @@ def create_patient():
     if name and dni and email:
         #hashed_password = generate_password_hash(password)
         id = mongo.db.Pacientes.insert_one(
-            {'name': name, 
+            {'name': name,
             'dni': dni,
             'email': email,
             'codigoPostal': codigoPostal,
@@ -116,15 +119,15 @@ def create_patient():
         )
         response = {
             'id':str(id),
-            'name': name, 
+            'name': name,
             'dni': dni,
             'email': email,
             'codigoPostal': codigoPostal,
             'genero': genero,
             'telefono': telefono,
-            'fechaNacimiento': fechaNacimiento  
+            'fechaNacimiento': fechaNacimiento
         }
-        return response 
+        return response
     else:
         return not_found()
 
@@ -140,7 +143,7 @@ def  get_patients():
 def get_onepatient(id):
     user = mongo.db.Pacientes.find_one({'_id': ObjectId(id)})
     response = json_util.dumps(user)
-    return Response (response, mimetype='application/json') 
+    return Response (response, mimetype='application/json')
 
 #Eliminamos un paciente por ID
 @app.route('/Pacientes/<id>', methods=['DELETE'])
@@ -165,7 +168,3 @@ def update_patient(id):
         }})
         response = jsonify({'message': 'El Usuario ' + id + ' fue actualizado correctamente!'})
         return response
-
-# Se agrega un nuevo commit de prueba 10-04-2022  18:00
-if __name__ == "__main__":
-    app.run(debug=True)
