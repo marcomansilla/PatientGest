@@ -1,0 +1,31 @@
+version: '3.7'
+
+services:
+  backend:
+    build: ./backend/
+    volumes:
+      - ./backend:/app
+    ports:
+      - 5001:5001
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  db:
+    image: mongo:4.2
+    restart: always
+    volumes:
+      - ./data:/data/db
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_PASSWORD: patientdb
+      MONGO_INITDB_ROOT_USERNAME: patientdb
+      MONGO_INITDB_DATABASE: patientdb
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: "bridge"
